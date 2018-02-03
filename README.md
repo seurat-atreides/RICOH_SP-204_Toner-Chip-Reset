@@ -1,9 +1,7 @@
-
-Here are some advices to reset your toner chip with an Arduino.
-
 # Introduction
 
-Some printer toner comes with a small circuit like:
+The RICOH SP 204 printer toners have a chip that keepos track of the number of pages that have been printed.
+This is anoying because it will render a refill useless.
 
 ![Picture of toner](images/sp112_toner.png)
 
