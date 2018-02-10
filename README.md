@@ -432,46 +432,19 @@ Logical Analyser & I2C:
 	http://support.saleae.com/hc/en-us/articles/200730905-Learn-I2C-Inter-Integrated-Circuit
 
 
-Ricoh SP112 LED
-===============
-
-	Left LED: Power Indicator
-	This indicator lights up blue when the machine is turned on.
-	It flashes when a print job is received and while printing is in progress.
-
-	Right LED: Alert Indicator
-	This indicator lights up red when the machine runs out of paper or consumables,
-	when the paper settings do match the settings specified by the driver,
-	or when other abnormalities occur.
-
-
-
 Todo
 ====
 
-- [x] Create arduino hello world
 - [x] Read internal EEPROM
 - [x] Draw the cricuit
 - [x] Understand the cricuit
-- [x] Try I2C clock at 400kHz and 1MHz
+- [x] Try I2C clock at 800kHz and 1MHz
 - [x] Scan for device => use MultiSpeedScanner
-- [x] Analyse I2C trame with a logical analyser
-- [x] Visualize I2C packets with pulseview
-- [x] Read one EEPROM datasheet
-- [x] Debug I2C addresses sent (1010001 and not 0101000) ~ frequence to high
-- [x] Verifies the timming between read and write operations (5ms)
-- [x] Find the exact EEPROM chip model
-- [x] Find the EEPROM address (0x53)
-- [x] Read the EPPROM chip
-- [x] Order sp112 reset chip from internet
-- [x] Analyse the EEPROM dump
-- [x] Make a data hypothesis
+- [x] Dump the EPPROM chip contents
 - [x] Verify the write function
-- [x] Dump a new reset chip
-- [x] Write the EEPROM with a dump of a new reset chip
+- [x] Experiment with reset patterns
 - [x] Test with the printer
+- [x] Document the findings
 - [ ] Learn about README.md format (image insertion & style)
-- [ ] Write an article about this
-
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
