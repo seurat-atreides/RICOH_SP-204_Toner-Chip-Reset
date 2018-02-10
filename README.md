@@ -42,7 +42,7 @@ bus.
 	|            |           |           |            |             |
 	+------------+           +-----------+            +-------------+
 
-What I did is connect an Arduino Pro micro directly to the toner
+What I did is connect an Arduino Pro mini directly to the toner
 chip like this:
 
 	+-----------+          +-----------+
@@ -81,20 +81,17 @@ BR24L02W EEPROM, the equivalent of the 24C02 EEPROM.
 ![Front chip](images/front_circuit.png)
 ![Front chip](images/back_circuit.png)
 
-If you have absolutly no idea, jump to the section: "Bonus 1: snif the
-I2C commands" at the end of this page.
-
-The rest of the tutorial is about how to read and write this EEPROM
+The rest of this tutorial is about how to read and write this EEPROM
 memory.
 
 Step 2: connect your Arduino
 ============================
 
-Depending on the board the I2C pins are:
+Depending on the Arduino you might have, the I2C pins are:
 
 | Board         |   I2C pins           |
 | :--:          | :--:                 |
-| Uno, Ethernet |   A4 (SDA), A5 (SCL) |
+| Pro mini      |   A4 (SDA), A5 (SCL) |
 | Mega2560      |   20 (SDA), 21 (SCL) |
 | Due           |   20 (SDA), 21 (SCL) |
 | Leonardo      |   2 (SDA), 3 (SCL)   |
@@ -399,200 +396,9 @@ in your program.
 Step 7: share your findings
 ===========================
 
-Congrats! You have done some work, collected some information and get
-a better understanding of your toner chip. Let the world know
-about your findings and learn from others!
+If you decide to perform something similar on other toner chip model
+please share your findings with the community!
 
-
-Bonus 1: snif the I2C commands
-=============================
-
-One way to gain some insight about the memory layout, is to spy the
-communication between the printer and the toner during the printing
-processus.
-
-In order to do so, we can use a logical analyser. This is a simple
-equipement that will record the logical state of the wires.
-
-
-	+------------+           +-----------+            +-------------+
-	|    Host    |    USB    |           |    I2C     |    toner    |
-	|  computer  | <-------> |  Printer  | <--------> |    chip     |
-	|            |           |           |      ^     |             |
-	+------------+           +-----------+      |     +-------------+
-	                                            |
-	                                        logical
-	                                        analyser
-
-This can be very useful to learn:
-
-* the general properties of the communication (type of
-  bus, clock speed, device address).
-* what memory address the printer read and write
-
-The main open source project to use logical analysers is
-[Sigrok](http://sigrok.org). For the list of supported analysers
-please refer to [supported hardware page](https://sigrok.org/wiki/Supported_hardware).
-
-The following pictures explain the settings:
-
-1. attach the wires to the circuit and put back the circuit on the
-   toner in the printer.
-2. connect the logical analyzer.
-
-![Picture back circuit](images/back_circuit.jpg)
-
-![Picture logical analyzer printer](images/logical_analyser.jpg)
-
-To capture the data transfert, you can use a graphical tool
-like [Pulseview](https://sigrok.org/wiki/PulseView).
-
-![Picture of Pulseview interface](pulseview/capture_eeprom.png)
-
-You can also use the command line tool called
-[sigrok-cli](https://sigrok.org/wiki/Sigrok-cli) as demonstrated
-bellow:
-
-
-```sh
-	$ sigrok-cli -i start_printer_failed.sr -P i2c:scl=2:sda=3,eeprom24xx
-	Control code bits: 1010
-	Address bit 2: 0
-	Address bit 1: 1
-	Address bit 0: 1
-	R/W bit: write
-	Control word
-	Warning: Slave replied, but master aborted!
-	Control code bits: 1010
-	Address bit 2: 0
-	Address bit 1: 1
-	Address bit 0: 1
-	R/W bit: write
-	Control word
-	Control code bits: 1010
-	Address bit 2: 0
-	Address bit 1: 1
-	Address bit 0: 1
-	R/W bit: read
-	Control word
-	Word address byte: 00
-	Sequential random read (addr=00, 128 bytes): 20 00 01 03 01 01
-	03 00 00 00 FF FF FF FF FF FF 15 04 4D 47 27 00 18 82 00 00 00 00 20
-	00 01 01 58 30 32 35 4D 34 33 31 35 36 36 20 00 45 00 00 00 00 00 00
-	00 00 00 00 00 00 01 06 00 00 00 00 00 00 01 07 00 00 00 00 00 00 00
-	00 00 00 00 00 00 00 00 00 00 00 01 06 20 00 01 01 20 00 01 01 00 00
-	00 00 00 00 00 00 01 06 00 00 00 00 00 00 00 0E 73 51 10 00 14 27 00
-	00 00 00 00 00 00 00
-	Control code bits: 1010
-	Address bit 2: 0
-	Address bit 1: 1
-	Address bit 0: 1
-	R/W bit: write
-	Control word
-	Word address byte: 76
-	Word address
-	Data byte 76: 14
-	Data
-	Byte write (addr=76, 1 byte): 14
-	Control code bits: 1010
-	Address bit 2: 0
-	Address bit 1: 1
-	Address bit 0: 1
-	R/W bit: write
-	Control word
-	Word address byte: 70
-	Word address
-	Data byte 70: 00
-	Data byte 71: 0E
-	Data byte 72: 75
-	Data byte 73: 45
-	Data
-	Page write (addr=70, 4 bytes): 00 0E 75 45
-	Control code bits: 1010
-	Address bit 2: 0
-	Address bit 1: 1
-	Address bit 0: 1
-	R/W bit: write
-	Control word
-	Word address byte: 70
-	Word address
-	Data byte 70: 00
-	Data byte 71: 0E
-	Data byte 72: 77
-	Data byte 73: 39
-	Data
-	Page write (addr=70, 4 bytes): 00 0E 77 39
-	Control code bits: 1010
-	Address bit 2: 0
-	Address bit 1: 1
-	Address bit 0: 1
-	R/W bit: write
-	Control word
-	Word address byte: 77
-	Word address
-	Data byte 77: 5A
-	Data
-	Byte write (addr=77, 1 byte): 5A
-	Control code bits: 1010
-	Address bit 2: 0
-	Address bit 1: 1
-	Address bit 0: 1
-	R/W bit: write
-	Control word
-	Word address byte: 70
-	Word address
-	Data byte 70: 00
-	Data byte 71: 0E
-	Data byte 72: 77
-	Data byte 73: 8D
-	Data
-	Page write (addr=70, 4 bytes): 00 0E 77 8D
-```
-
-How to read this: one sequential read of the content of the eeprom,
-followed by a sequence of write operations: 4 byte at 0x70, 1 byte at
-0x76. This the printer read all the eeprom, it is difficult to figure
-out which address hold which information.
-
-
-Bonus 2: snif the USB packets
-============================
-
-Here is an example of USB command sent by the proprietary windows
-driver to the printer (captured with tcpdump when running windows
-inside qemu):
-
-	%-12345X@PJL
-	@PJL SET TIMESTAMP=2015/09/14 21:15:14
-	@PJL SET FILENAME=test - Notepad
-	@PJL SET COMPRESS=JBIG
-	@PJL SET USERNAME=IEUser
-	@PJL SET COVER=OFF
-	@PJL SET HOLD=OFF
-	@PJL SET PAGESTATUS=START
-	@PJL SET COPIES=1
-	@PJL SET MEDIASOURCE=TRAY1
-	@PJL SET MEDIATYPE=PLAINRECYCLE
-	@PJL SET PAPER=LETTER
-	@PJL SET PAPERWIDTH=5100
-	@PJL SET PAPERLENGTH=6600
-	@PJL SET RESOLUTION=600
-	@PJL SET IMAGELEN=691
-	[... image data ... ]
-	@PJL SET DOTCOUNT=10745
-	@PJL SET PAGESTATUS=END
-	@PJL EOJ
-	%-12345X
-
-
-Usage
-=====
-
-```sh
-	$ make
-	$ make upload
-	$ picocom -b 115200 /dev/ttyACM0
-```
 Links
 =====
 
