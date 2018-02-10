@@ -3,7 +3,7 @@
 The RICOH SP 204 printer toners have a chip that keepos track of the number of pages that have been printed.
 This is anoying because it will render a refill useless.
 
-![Picture of toner]()
+![Picture of toner](images/SP-204_toner_cartridge.jpg)
 
 In order to reuse this kind of toner, there are two steps:
 

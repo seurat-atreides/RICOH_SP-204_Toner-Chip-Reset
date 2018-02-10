@@ -1,24 +1,32 @@
 //
-//    FILE: MultiSpeedI2CScanner.ino
+//    FILE: MultiSpeed_I2C_Scanner.ino
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.1.06
-// PURPOSE: I2C scanner @different speeds
+// VERSION: 0.1.7
+// PURPOSE: I2C scanner at different speeds
 //    DATE: 2013-11-05
 //     URL: http://forum.arduino.cc/index.php?topic=197360
 //
 // Released to the public domain
 //
 
-#include <Wire.h>
 #include <Arduino.h>
+#include <extEEPROM.h>
 
-const char version[] = "0.1.06";
+TwoWire *wi;
+
+const char version[] = "0.1.7";
+
+
+// INTERFACE COUNT (TESTED TEENSY 3.5 AND ARDUINO DUE ONLY)
+int wirePortCount = 1;
+int selectedWirePort = 0;
+
 
 // scans devices from 50 to 800KHz I2C speeds.
 // lower than 50 is not possible
 // DS3231 RTC works on 800 KHz. TWBR = 2; (?)
 const long allSpeed[] = {
-  50, 100, 200, 250, 400, 500, 800, 1000
+  50, 100, 200, 300, 400, 500, 600, 700, 800, 1000
 };
 long speed[sizeof(allSpeed) / sizeof(allSpeed[0])];
 int speeds;
@@ -26,13 +34,16 @@ int speeds;
 int addressStart = 0;
 int addressEnd = 127;
 
+
 // DELAY BETWEEN TESTS
 #define RESTORE_LATENCY  5    // for delay between tests of found devices.
 bool delayFlag = false;
 
+
 // MINIMIZE OUTPUT
 bool printAll = true;
 bool header = true;
+
 
 // STATE MACHINE
 enum states {
@@ -40,8 +51,137 @@ enum states {
 };
 states state = STOP;
 
+
+// TIMING
 uint32_t startScan;
 uint32_t stopScan;
+
+
+void setup()
+{
+  Serial.begin(57600);
+  Wire.begin();
+
+#if defined WIRE_IMPLEMENT_WIRE1 || WIRE_INTERFACES_COUNT > 1
+  Wire1.begin();
+  wirePortCount++;
+#endif
+#if defined WIRE_IMPLEMENT_WIRE2 || WIRE_INTERFACES_COUNT > 2
+  Wire2.begin();
+  wirePortCount++;
+#endif
+#if defined WIRE_IMPLEMENT_WIRE3 || WIRE_INTERFACES_COUNT > 3
+  Wire3.begin();
+  wirePortCount++;
+#endif
+
+  wi = &Wire;
+
+  setSpeed('0');
+  displayHelp();
+}
+
+
+void loop()
+{
+  char command = getCommand();
+  switch (command)
+  {
+    case '@':
+      selectedWirePort = (selectedWirePort + 1) % wirePortCount;
+      Serial.print(F("I2C PORT=Wire"));
+      Serial.println(selectedWirePort);
+      switch (selectedWirePort)
+      {
+        case 0:
+          wi = &Wire;
+          break;
+        case 1:
+#if defined WIRE_IMPLEMENT_WIRE1 || WIRE_INTERFACES_COUNT > 1
+          wi = &Wire1;
+#endif
+          break;
+        case 2:
+#if defined WIRE_IMPLEMENT_WIRE2 || WIRE_INTERFACES_COUNT > 2
+          wi = &Wire2;
+#endif
+          break;
+        case 3:
+#if defined WIRE_IMPLEMENT_WIRE3 || WIRE_INTERFACES_COUNT > 3
+          wi = &Wire3;
+#endif
+          break;
+      }
+      break;
+
+    case 's':
+      state = ONCE;
+      break;
+    case 'c':
+      state = CONT;
+      break;
+    case 'd':
+      delayFlag = !delayFlag;
+      Serial.print(F("<delay="));
+      Serial.println(delayFlag ? F("5>") : F("0>"));
+      break;
+
+    case 'e':
+      // eeprom test TODO
+      break;
+
+    case 'h':
+      header = !header;
+      Serial.print(F("<header="));
+      Serial.println(header ? F("yes>") : F("no>"));
+      break;
+    case 'p':
+      printAll = !printAll;
+      Serial.print(F("<print="));
+      Serial.println(printAll ? F("all>") : F("found>"));
+      break;
+
+    case '0':
+    case '1':
+    case '2':
+    case '4':
+    case '8':
+    case '9':
+      setSpeed(command);
+      break;
+
+    case 'a':
+      setAddress();
+      break;
+
+    case 'q':
+    case '?':
+      state = HELP;
+      break;
+    default:
+      break;
+  }
+
+  switch (state)
+  {
+    case ONCE:
+      I2Cscan();
+      state = HELP;
+      break;
+    case CONT:
+      I2Cscan();
+      delay(1000);
+      break;
+    case HELP:
+      displayHelp();
+      state = STOP;
+      break;
+    case STOP:
+      break;
+    default: // ignore all non commands
+      break;
+  }
+}
 
 
 void setAddress()
@@ -84,6 +224,10 @@ void setSpeed(char sp)
       speed[0] = 800;
       speeds = 1;
       break;
+    case '9':
+      speed[0] = 1000;
+      speeds = 1;
+      break;      
     case '0':  // reset
       speeds = sizeof(allSpeed) / sizeof(allSpeed[0]);
       for (int i = 0; i < speeds; i++)
@@ -106,9 +250,12 @@ char getCommand()
 
 void displayHelp()
 {
-  Serial.print(F("\nArduino I2C Scanner - "));
+  Serial.print(F("\nArduino MultiSpeed I2C Scanner - "));
   Serial.println(version);
   Serial.println();
+  Serial.print(F("I2C ports: "));
+  Serial.println(wirePortCount);
+  Serial.println(F("\t@ = toggle Wire - Wire1 - Wire2 [TEENSY 3.5 or Arduino Due]"));
   Serial.println(F("Scanmode:"));
   Serial.println(F("\ts = single scan"));
   Serial.println(F("\tc = continuous scan - 1 second delay"));
@@ -119,11 +266,12 @@ void displayHelp()
   Serial.println(F("\th = toggle header - noHeader."));
   Serial.println(F("\ta = toggle address range, 0..127 - 8..120"));
   Serial.println(F("Speeds:"));
-  Serial.println(F("\t0 = 50 - 800 Khz"));
-  Serial.println(F("\t1 = 100 KHz only"));
-  Serial.println(F("\t2 = 200 KHz only"));
-  Serial.println(F("\t4 = 400 KHz only"));
-  Serial.println(F("\t8 = 800 KHz only"));
+  Serial.println(F("\t0 =  50 - 800 Khz"));
+  Serial.println(F("\t1 =  100 KHz only"));
+  Serial.println(F("\t2 =  200 KHz only"));
+  Serial.println(F("\t4 =  400 KHz only"));
+  Serial.println(F("\t8 =  800 KHz only"));
+  Serial.println(F("\t9 = 1000 KHz only"));  
   Serial.println(F("\n\t? = help - this page"));
   Serial.println();
 }
@@ -153,15 +301,15 @@ void I2Cscan()
   // TEST
   // 0.1.04: tests only address range 8..120
   // --------------------------------------------
-  // Address	R/W Bit	Description
-  // 0000 000   0	General call address
-  // 0000 000   1	START byte
-  // 0000 001   X	CBUS address
-  // 0000 010   X	reserved - different bus format
-  // 0000 011   X	reserved - future purposes
-  // 0000 1XX   X	High Speed master code
-  // 1111 1XX   X	reserved - future purposes
-  // 1111 0XX   X	10-bit slave addressing
+  // Address  R/W Bit Description
+  // 0000 000   0 General call address
+  // 0000 000   1 START byte
+  // 0000 001   X CBUS address
+  // 0000 010   X reserved - different bus format
+  // 0000 011   X reserved - future purposes
+  // 0000 1XX   X High Speed master code
+  // 1111 1XX   X reserved - future purposes
+  // 1111 0XX   X 10-bit slave addressing
   for (uint8_t address = addressStart; address <= addressEnd; address++)
   {
     bool printLine = printAll;
@@ -171,12 +319,12 @@ void I2Cscan()
     for (uint8_t s = 0; s < speeds ; s++)
     {
 #if ARDUINO >= 158
-      Wire.setClock(speed[s] * 1000);
+      wi->setClock(speed[s] * 1000);
 #else
       TWBR = (F_CPU / (speed[s] * 1000) - 16) / 2;
 #endif
-      Wire.beginTransmission (address);
-      found[s] = (Wire.endTransmission () == 0);
+      wi->beginTransmission (address);
+      found[s] = (wi->endTransmission () == 0);
       fnd |= found[s];
       // give device 5 millis
       if (fnd && delayFlag) delay(RESTORE_LATENCY);
@@ -215,84 +363,3 @@ void I2Cscan()
   }
 }
 
-void setup()
-{
-  Serial.begin(115200);
-  Wire.begin();
-  setSpeed('0');
-  displayHelp();
-}
-
-
-void loop()
-{
-  char command = getCommand();
-  switch (command)
-  {
-    case 's':
-      state = ONCE;
-      break;
-    case 'c':
-      state = CONT;
-      break;
-    case 'd':
-      delayFlag = !delayFlag;
-      Serial.print(F("<delay="));
-      Serial.println(delayFlag ? F("5>") : F("0>"));
-      break;
-
-    case 'e':
-      // eeprom test TODO
-      break;
-
-    case 'h':
-      header = !header;
-      Serial.print(F("<header="));
-      Serial.println(header ? F("yes>") : F("no>"));
-      break;
-    case 'p':
-      printAll = !printAll;
-      Serial.print(F("<print="));
-      Serial.println(printAll ? F("all>") : F("found>"));
-      break;
-
-    case '0':
-    case '1':
-    case '2':
-    case '4':
-    case '8':
-      setSpeed(command);
-      break;
-
-    case 'a':
-      setAddress();
-      break;
-
-    case 'q':
-    case '?':
-      state = HELP;
-      break;
-    default:
-      break;
-  }
-
-  switch (state)
-  {
-    case ONCE:
-      I2Cscan();
-      state = HELP;
-      break;
-    case CONT:
-      I2Cscan();
-      delay(1000);
-      break;
-    case HELP:
-      displayHelp();
-      state = STOP;
-      break;
-    case STOP:
-      break;
-    default: // ignore all non commands
-      break;
-  }
-}
