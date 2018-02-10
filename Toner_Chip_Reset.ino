@@ -2,8 +2,8 @@
     FILE: Toner_Chip_Reset.ino
   AUTHOR: Ernesto Lorenz
  VERSION: 0.1
- PURPOSE: Reset chip for Ricoh SP-204 toner
-    DATE: 2016-03-03
+ PURPOSE: Reset chip for the Ricoh Aficio SP-204 toner cartridge
+    DATE: 10.02.2018
   GITHUB: 
 
  Released to the public domain
@@ -69,7 +69,7 @@ void initialize(void) {
 }
 
 void reset(void) {
-  toner_chip.write(0x0, chip_dump2, chip_dump_len); //buffered write to the chip
+  toner_chip.write(0x0, chip_reset, chip_dump_len); //buffered write to the chip
   Serial.println();
   dump();
 }

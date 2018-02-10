@@ -266,7 +266,7 @@ void displayHelp()
   Serial.println(F("\th = toggle header - noHeader."));
   Serial.println(F("\ta = toggle address range, 0..127 - 8..120"));
   Serial.println(F("Speeds:"));
-  Serial.println(F("\t0 =  50 - 800 Khz"));
+  Serial.println(F("\t0 =  50 - 1MHz"));
   Serial.println(F("\t1 =  100 KHz only"));
   Serial.println(F("\t2 =  200 KHz only"));
   Serial.println(F("\t4 =  400 KHz only"));

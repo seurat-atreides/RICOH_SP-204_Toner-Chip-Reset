@@ -1,3 +1,9 @@
+# Acknowledgement
+
+I'd like to thank Ludivic Guegan (lugu), from whom I forked the base for this work, 
+for inspiring me to do experiment with my printers (RICOH Aficio SP-204) toner chip 
+model and be able to reset it effectively. It has been a great learning experience 
+on how the I2C protocol works and how to manipulate I2C EEPROMS.
 
 # Introduction
 
@@ -25,11 +31,9 @@ I will step through the process of understanding the problem, analysing the
 chip circuit, dumping the chip contents and writing back a pattern so the 
 printer will be able to initialize the chip and set the toner level to full.
 
-For more information about why manufaturer include those chips, read
-the [about page](ABOUT.md).
 
-![Picture: front of the toner chip](images/toner_chip_front.jpg)
-![Picture: rear of the toner chip](images/toner_chip_back_tags.jpg)
+![Picture: front of the toner chip](images/toner_chip_front_tagged.jpg)
+![Picture: rear of the toner chip](images/toner_chip_back_tagged.jpg)
 
 # Step 1: The problem
 
@@ -103,13 +107,13 @@ Then connect GND and VCC to 3.3V.
 Step 3: find the I2C clock and address
 ======================================
 
-To communicate on an I2C bus, we need to know the clock speed and the
+To communicate on an I2C bus, we need to know the correct clock speed and the
 address of the EEPROM.
 
 If you know the EEPROM model from the circuit analysis, you can
 read the datasheet and find the clock rate and address like this:
 
-For example the [datasheet of the component FM24C02B](datasheet/FM24C02B-04B-08B-16B.pdf)
+For example the [datasheet of the component BR24L02-W](datasheet/BR24Lxxx-W-EEPROM.pdf)
 indicates an operating clock of 1MHz at 3.3V.
 The datasheet indicates how to calculate the address according to the
 PIN A0, A1 and A2. In binary, the address is computed like this: ``1 0
@@ -121,76 +125,51 @@ So if the configuration is:
 	A1 = 1
 	A2 = 0
 
-The address is ``1 0 1 0 0 1 1`` (83).
+The address is ``1 0 1 0 0 1 1`` (0x53).
 
-Note: 1MHz seems to be the upper bound of the my Arduino Mega can reach.
-So I just use 800 kHz, see the [full discussion](http://electronics.stackexchange.com/questions/29457/how-to-make-arduino-do-high-speed-i2c).
+Note: 1MHz seems to be the upper bound of the my Arduino can reach.
+I modified Multispeed_I2C_scanner.ino to scan at a max. speed of 1MHz.
+If interested in details see the [full discussion](http://electronics.stackexchange.com/questions/29457/how-to-make-arduino-do-high-speed-i2c).
 
 If you don't know the clock rate and the device address on the I2C
 bus, you can scan all the possible I2C addresses at different clock
 rate. The directory scanner have a sketch to do this. Here is the
 output of the program execution on my Arduino:
 
-	Arduino I2C Scanner - 0.1.06
-
-	Scanmode:
-		s = single scan
-		c = continuous scan - 1 second delay
-		q = quit continuous scan
-		d = toggle latency delay between successful tests. 0 - 5 ms
-	Output:
-		p = toggle printAll - printFound.
-		h = toggle header - noHeader.
-		a = toggle address range, 0..127 - 8..120
-	Speeds:
-		0 = 50 - 800 Khz
-		1 = 100 KHz only
-		2 = 200 KHz only
-		4 = 400 KHz only
-		8 = 800 KHz only
-
-		? = help - this page
-
-	TIME	DEC	HEX		50	100	200	250	400	500	800	[KHz]
-	---------------------------------------------------------------------------------------------
-	2987	0	0x00		.	.	.	.	.	.	.
-	2990	1	0x01		.	.	.	.	.	.	. 
-	2992	2	0x02		.	.	.	.	.	.	. 
-	2994	3	0x03		.	.	.	.	.	.	. 
-	2997	4	0x04		.	.	.	.	.	.	. 
-	2999	5	0x05		.	.	.	.	.	.	. 
-	3002	6	0x06		.	.	.	.	.	.	. 
-	3004	7	0x07		.	.	.	.	.	.	. 
-	3007	8	0x08		.	.	.	.	.	.	. 
-	3009	9	0x09		.	.	.	.	.	.	. 
-	3012	10	0x0A		.	.	.	.	.	.	. 
-	[...]
-	3196	80	0x50		.	.	.	.	.	.	. 
-	3200	81	0x51		.	.	.	.	.	.	. 
-	3202	82	0x52		.	.	.	.	.	.	. 
-	3205	83	0x53		V	V	V	V	V	V	V 
-	3207	84	0x54		.	.	.	.	.	.	. 
-	3210	85	0x55		.	.	.	.	.	.	. 
-	3212	86	0x56		.	.	.	.	.	.	. 
-	3215	87	0x57		.	.	.	.	.	.	. 
-	3218	88	0x58		.	.	.	.	.	.	. 
-	3220	89	0x59		.	.	.	.	.	.	. 
-	3223	90	0x5A		.	.	.	.	.	.	. 
-	[...]
-	3304	120	0x78		.	.	.	.	.	.	. 
-	3306	121	0x79		.	.	.	.	.	.	. 
-	3309	122	0x7A		.	.	.	.	.	.	. 
-	3312	123	0x7B		.	.	.	.	.	.	. 
-	3314	124	0x7C		.	.	.	.	.	.	. 
-	3317	125	0x7D		.	.	.	.	.	.	. 
-	3320	126	0x7E		.	.	.	.	.	.	. 
-	3322	127	0x7F		.	.	.	.	.	.	. 
-
-	1 device find in 347 milliseconds.
+    1 devices found in 111 milliseconds.
+    
+    Arduino MultiSpeed I2C Scanner - 0.1.7
+    
+    I2C ports: 1
+    	@ = toggle Wire - Wire1 - Wire2 [TEENSY 3.5 or Arduino Due]
+    Scanmode:
+    	s = single scan
+    	c = continuous scan - 1 second delay
+    	q = quit continuous scan
+    	d = toggle latency delay between successful tests. 0 - 5 ms
+    Output:
+    	p = toggle printAll - printFound.
+    	h = toggle header - noHeader.
+    	a = toggle address range, 0..127 - 8..120
+    Speeds:
+    	0 =  50 - 1MHz
+    	1 =  100 KHz only
+    	2 =  200 KHz only
+    	4 =  400 KHz only
+    	8 =  800 KHz only
+    	9 = 1000 KHz only
+    
+    	? = help - this page
+    
+    TIME	DEC	HEX		50	100	200	300	400	500	600	700	800	1000	[KHz]
+    ---------------------------------------------------------------------
+    30148	83	0x53	V	V	V	V	V	V	V	V	V	V
+    
+    1 devices found in 606 milliseconds.
 
 
-From here, we know the device address on the I2C bus is 83 (0x53) and
-the operating clock is anything between 50 kHz and 800 kHz.
+From here, we know the device address on the I2C bus is 0x53 and
+the operating clock is anything between 50 kHz and 1 MHz.
 
 
 Step 4: reading the EEPROM
@@ -210,52 +189,34 @@ of the memory. For 24xxx EEPROM, the [datasheet for FM24C02B](datasheet/FM24C02B
 	STOP condition mandatory between writes.
 	Write cycle: 5 ms.
 
-The function "printRandomAddress" of the Reset.ino sketch implements
-this random read operation. Once the read operation works, you can
-print each bytes of the EEPROM one by one and save them in a file.
 
-```sh
-	$ head dump.txt
-	0x20
-	0x0
-	0x1
-	0x3
-	0x1
-	0x1
-	0x3
-	0x0
-	0x0
-	0x0
-```
 
-Next I converted the text file into a binary format. I found binary
-format easier to analyze with xxd:
+The contents of the original toner chip after printer started to complain about 
+low toner level was:
 
-	$ head -n 256 dump.txt | xargs printf "%02x\n" | xxd -c 1 -p -r > dump.bin
-	$ xxd dump.bin
-	00000000: 2000 0103 0101 0300 0000 ffff ffff ffff   ...............
-	00000010: 1504 4d47 2700 1882 0000 0000 2000 0101  ..MG'....... ...
-	00000020: 5830 3235 4d34 3331 3536 3620 0045 0000  X025M431566 .E..
-	00000030: 0000 0000 0000 0000 0000 0106 0000 0000  ................
-	00000040: 0000 0107 0000 0000 0000 0000 0000 0000  ................
-	00000050: 0000 0000 0000 0106 2000 0101 2000 0101  ........ ... ...
-	00000060: 0000 0000 0000 0000 0106 0000 0000 0000  ................
-	00000070: 000e 715d 1000 1427 0000 0000 0000 0000  ..q]...'........
-	00000080: ffff ffff ffff ffff ffff ffff ffff ffff  ................
-	00000090: ffff ffff ffff ffff ffff ffff ffff ffff  ................
-	000000a0: ffff ffff ffff ffff ffff ffff ffff ffff  ................
-	000000b0: ffff ffff ffff ffff ffff ffff ffff ffff  ................
-	000000c0: ffff ffff ffff ffff ffff ffff ffff ffff  ................
-	000000d0: ffff ffff ffff ffff ffff ffff ffff ffff  ................
-	000000e0: ffff ffff ffff ffff ffff ffff ffff ffff  ................
-	000000f0: ffff ffff ffff ffff ffff ffff ffff ffff  ................
+    000: 21 00 01 03 03 01 01 00  00 00 34 30 37 32 35 35  |!.........407255|
+    010: 13 04 4d 43 10 00 01 02  00 00 00 00 20 14 07 31  |..MC........ ..1|
+    020: 54 37 37 33 4d 38 30 31  31 32 30 20 1e 30 00 00  |T773M801120 .0..|
+    030: 00 00 01 54 00 00 00 00  00 00 00 00 00 00 00 00  |...T............|
+    040: 00 00 03 38 00 00 00 00  00 00 00 00 00 00 00 00  |...8............|
+    050: 00 00 00 00 00 00 00 00  20 14 12 29 00 00 00 00  |........ ..)....|
+    060: 00 00 00 00 00 00 00 00  02 b4 00 00 00 00 00 00  |................|
+    070: 00 1e 7a 55 00 00 0a 08  00 00 00 00 00 00 00 00  |..zU............|
+    080: ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
+    090: ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
+    0a0: ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
+    0b0: ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
+    0c0: ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
+    0d0: ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
+    0e0: ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
+    0f0: ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
 
 Here we can see:
 
 * there seems to be a header (0x0 to 0x0f),
 * followed by some numbers (0x10 to 0x1f),
-* followed by a string (X025M431566)
-* followed by some sparse values
+* followed by the printer ID (T773M801120),
+* followed by some other unknown values.
 
 This does not make much sense. The next step is to figure out what
 those values are for.
@@ -352,45 +313,36 @@ The process is like this:
 * write the content into the EEPROM
 * try to print a page and restart if this does not work.
 
-In order to speed-up the process, i directly connect my Arduino to the
-chip inside the printer so i do not need to manipulate the printer
-during the experiments.
+In order to speed up the process and not have to remove/reapply the chip to the toner 
+cartridge every time, I directly connected my Arduino to the chip on the toner while resetting it.
 
-![Picture working installation](images/final_setup.jpg)
+![Picture: Working setup](images/final_setup.jpg)
 
-As for me, i try a couple of random changes without success.
-Then i had the idea to erase all the memory except the addresses 0x0
-to 0x0f and it worked!
 
-Another advantage of the binary data: with xxd you can convert the
-binary data into a C header file. This C header file can be included
-in your program.
+After experimenting a bit I decided to only include the  first 8 (0x00 - 0x07) bytes from the original chip dump.
+The rest of the first half of the chip contents are set to 0x00! The second half is not used.
+It turned out to work: my printer restarts and the tonner level indicator is at 100%
 
-	$ xxd -i dump.bin | tee dump_bin.h
-	unsigned char dump_bin[] = {
-	  0x20, 0x00, 0x01, 0x03, 0x01, 0x01, 0x03, 0x00, 0x00, 0x00, 0xff, 0xff,
-	  0xff, 0xff, 0xff, 0xff, 0x15, 0x04, 0x4d, 0x47, 0x27, 0x00, 0x18, 0x82,
-	  0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x01, 0x01, 0x58, 0x30, 0x32, 0x35,
-	  0x4d, 0x34, 0x33, 0x31, 0x35, 0x36, 0x36, 0x20, 0x00, 0x45, 0x00, 0x00,
-	  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x06,
-	  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x07, 0x00, 0x00, 0x00, 0x00,
-	  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	  0x00, 0x00, 0x01, 0x06, 0x20, 0x00, 0x01, 0x01, 0x20, 0x00, 0x01, 0x01,
-	  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x06, 0x00, 0x00,
-	  0x00, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x71, 0x5d, 0x10, 0x00, 0x14, 0x27,
-	  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff,
-	  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	  0xff, 0xff, 0xff, 0xff
-	};
+Here is are the contents of the header arry used to reset the chip:
+
+    unsigned char chip_reset[] = {
+      0x21, 0x00, 0x01, 0x03, 0x03, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+    };
 	unsigned int dump_bin_len = 256;
 
 
@@ -402,6 +354,9 @@ please share your findings with the community!
 
 Links
 =====
+
+Original project:
+    https://github.com/lugu/toner_chip_reset
 
 Blog:
 	http://www.hobbytronics.co.uk/arduino-external-eeprom
