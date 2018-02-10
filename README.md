@@ -28,6 +28,7 @@ For more information about why manufaturer include those chips, read
 the [about page](ABOUT.md).
 
 ![Picture of the font circuit](images/toner_chip_front.jpg)
+![Picture of the back circuit](images/toner_chip_back.jpg)
 
 # Step 1: The problem
 
@@ -73,13 +74,12 @@ confirmed by two blogs discussing other RICOH printer models:
 * http://www.mikrocontroller.net/topic/369267
 * https://esdblog.org/ricoh-sp-c250dn-laser-printer-toner-hack/
 
-I still could not find the exact EERPOM model, but it is of the 24xxx
-family.
+Looking at the chip with a magnifying glass and slanted lighting I could read
+a partialy erased designation text "L02W". This chip turns out to be a 
+BR24L02W EEPROM, the equivalent of the 24C02 EEPROM.
  
 ![Front chip](images/front_circuit.png)
 ![Front chip](images/back_circuit.png)
-
-Your particular circuit will be different from this one.
 
 If you have absolutly no idea, jump to the section: "Bonus 1: snif the
 I2C commands" at the end of this page.
