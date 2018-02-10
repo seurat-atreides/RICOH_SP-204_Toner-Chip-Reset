@@ -1,11 +1,11 @@
 # Introduction
 
-The RICOH SP 204 printer toners have a chip that keepos track of the number of pages that have been printed.
+The RICOH SP 204 printer toners have a chip that keeps track of the number of pages that have been printed.
 This is anoying because it will render a refill useless.
 
 ![Picture of toner](images/SP-204_toner_cartridge.jpg)
 
-In order to reuse this kind of toner, there are two steps:
+In order to reuse this kind of toner, there are two things you need to do:
 
 1. refill the toner with ink (if needed)
 2. reset the toner chip (or replace it)
@@ -13,27 +13,27 @@ In order to reuse this kind of toner, there are two steps:
 There is [plenty of information](www.uni-kit.com/pdf/tonerrefillinstructions.pdf) explaining how to refill the
 toner but little information on how to erase the toner chip.
 
-This document deals with the second part: how to analyse the chip and
+This document deals with the second point: how to dump the chip and
 reset it.
 
 It took me a while to get everything setup and to have my toner chip
-reset so i would like to share this process in order to help other to
-do the same on their printer.
+reset so I would like to share this process in order to help other to
+do the same with their printer toner cartridges.
 
-We will go step-by-step to understand the problem, analyse the
-circuit, read the chip memory and write it back so the toner can
-function again.
+I will step through the process of understanding the problem, analysing the
+chip circuit, dumping the chip contents and writing back a pattern so the 
+printer will be able to initialize the chip and set the toner level to full.
 
 For more information about why manufaturer include those chips, read
 the [about page](ABOUT.md).
 
-![Picture of the font circuit](images/front_circuit.jpg)
+![Picture of the font circuit](images/toner_chip_front.jpg)
 
-# Step 0: the problem
+# Step 1: The problem
 
 Your computer talks to your printer via a USB link (or maybe through
 wifi). The printer itself communicate with the toner chip via an I2C
-or a SPI bus.
+bus.
 
 	+------------+           +-----------+            +-------------+
 	|    Host    |    USB    |           |    I2C     |    toner    |
@@ -41,7 +41,7 @@ or a SPI bus.
 	|            |           |           |            |             |
 	+------------+           +-----------+            +-------------+
 
-So what we will do is to connect our Arduino directly to the toner
+What I did is connect an Arduino Pro micro directly to the toner
 chip like this:
 
 	+-----------+          +-----------+
@@ -51,27 +51,24 @@ chip like this:
 	+-----------+          +-----------+
 
 
-IC2 buses are very common on embedded systems. For example,
-smartphones use them to connect the touchscreen or the motion sensor
-to the main processor chip. There is plenty of documentation, i like
+The I2C bus is very common on embedded systems. For example:
+smartphones use it to connect the touchscreen or the motion sensor
+to the main processor chip. There is plenty of documentation, I 
+recommend this one:
 [this one from saleae](http://support.saleae.com/hc/en-us/articles/200730905-Learn-I2C-Inter-Integrated-Circuit).
 
 The full specification is avavailable at: http://www.i2c-bus.org/
 
-For your particalar printer, it might be an SPI bus instead of an I2C
-bus. But this does not really matter: the analysis procedure is the
-same.
+# Step 2: The chip circuit
 
-# Step 1: the circuit
-
-The first step is to analyse the circuit. Here you should gather as
-much information as you can:
+To do this it is necessary to know what I2C EEPROM is used in the circuit.
+Try to gather as much information as you can:
 
 * Read the part number and search it on the Internet.
 * Search if other people have shared information about your printer.
 
-In my case, the chip looked like an EEPROM memory. This is was
-confirmed by two blogs discussing other model Ricoh printers:
+In this case, the chip looked like an EEPROM memory. This has been
+confirmed by two blogs discussing other RICOH printer models:
 
 * http://www.mikrocontroller.net/topic/369267
 * https://esdblog.org/ricoh-sp-c250dn-laser-printer-toner-hack/
