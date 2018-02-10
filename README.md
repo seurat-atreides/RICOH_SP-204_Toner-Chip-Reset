@@ -161,9 +161,9 @@ output of the program execution on my Arduino:
     
     	? = help - this page
     
-    TIME	DEC	HEX		50	100	200	300	400	500	600	700	800	1000	[KHz]
-    ---------------------------------------------------------------------
-    30148	83	0x53	V	V	V	V	V	V	V	V	V	V
+    TIME	DEC	HEX     50  100  200  300  400  500  600  700  800  1000  [KHz]
+    ----------------------------------------------------------------------------
+    30148	83	0x53	 V   V    V    V    V    V    V    V    V    V
     
     1 devices found in 606 milliseconds.
 
