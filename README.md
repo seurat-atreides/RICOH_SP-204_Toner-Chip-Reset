@@ -28,6 +28,7 @@ For more information about why manufaturer include those chips, read
 the [about page](ABOUT.md).
 
 ![Picture of the font circuit](images/toner_chip_front.jpg)
+![Picture: rear side of the toner chip](images/toner_chip_back_tags.jpg)
 
 # Step 1: The problem
 
