@@ -79,7 +79,7 @@ I still could not find the exact EERPOM model, but it is of the 24xxx
 family.
  
 ![Front chip](images/front_circuit.png)
-![Front chip](images/back_circuit.png)
+![Front chip](images/back_circuit_tags.png)
 
 Your particular circuit will be different from this one.
 
