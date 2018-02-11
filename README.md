@@ -300,7 +300,7 @@ Links
 - [https://www.arduino.cc/en/Reference/Wire](https://www.arduino.cc/en/Reference/Wire)
 - [https://github.com/JChristensen/extEEPROM](https://github.com/JChristensen/extEEPROM)
 - [https://store.arduino.cc/usa/arduino-pro-mini](https://store.arduino.cc/usa/arduino-pro-mini)
-- [FTDI-232 USB-serial](https://www.banggood.com/FT232RL-FTDI-USB-To-TTL-Serial-Converter-Adapter-Module-For-Arduino-p-917226.html?rmmds=search&cur_warehouse=UK)
+- [SparkFun FTDI Basic Breakout - 3.3V](https://www.sparkfun.com/products/9873?_ga=2.206949079.536233059.1518330556-1739090519.1517237919)
 
 *Investigating Tonner cartridges:*
 
