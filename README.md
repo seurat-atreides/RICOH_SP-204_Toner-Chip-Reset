@@ -32,8 +32,7 @@ chip circuit, dumping the chip contents and writing back a pattern so the
 printer will be able to initialize the chip and set the toner level to full.
 
 
-![Picture: front of the toner chip](images/toner_chip_front_tagged.jpg)
-![Picture: rear of the toner chip](images/toner_chip_back_tagged.jpg)
+
 
 # Step 1: The problem
 
@@ -73,8 +72,8 @@ Try to gather as much information as you can:
 * Read the part number and search it on the Internet.
 * Search if other people have shared information about your printer.
 
-In this case, the chip looked like an EEPROM memory. This has been
-confirmed by two blogs discussing other RICOH printer models:
+The IC you see in the front side of the toner chip seems to be an EEPROM memory.
+This has been confirmed by the following blogs discussing other RICOH printer models:
 
 * http://www.mikrocontroller.net/topic/369267
 * https://esdblog.org/ricoh-sp-c250dn-laser-printer-toner-hack/
@@ -83,14 +82,22 @@ Looking at the chip with a magnifying glass and slanted lighting I could read
 a partialy erased designation text "L02W". This chip turns out to be a 
 BR24L02W EEPROM, the equivalent of the 24C02 EEPROM.
  
-![Front chip](images/front_circuit.png)
-![Front chip](images/back_circuit.png)
+![Picture: Toner Chip front](images/toner_chip_front_tagged.jpg)
+![Picture: Toner Chip rear ](images/toner_chip_back_tagged.jpg)
 
 The rest of this tutorial is about how to read and write this EEPROM
 memory.
 
-Step 2: connect your Arduino
-============================
+# Step 3: Set up your Arduino
+=============================
+
+Thi is the breadboard setup I used:
+
+![Pictire: Breadboard layput] (images/TonerChipResetBB.png)
+
+here is the corresponding schematic:
+
+![Pictire: Breadboard layput] (images/TonerChipResetSchem.pdf) 
 
 Depending on the Arduino you might have, the I2C pins are:
 
@@ -169,7 +176,12 @@ output of the program execution on my Arduino:
 
 
 From here, we know the device address on the I2C bus is 0x53 and
-the operating clock is anything between 50 kHz and 1 MHz.
+responds to SCL from 50 kHz to 1 MHz.
+
+Note: the BR24L02-W spec-sheet states that the max. SCL for 2.5Vdc <= Vcc =>  5.5 Vdc 
+should not exceed 400 KHz!
+
+Therefore, I have used 400 KHz as the clock frequency for I2C bus access.
 
 
 Step 4: reading the EEPROM
@@ -221,84 +233,6 @@ Here we can see:
 This does not make much sense. The next step is to figure out what
 those values are for.
 
-Step 5: understand the data
-===========================
-
-In order to understand the memory layout, we have to think like a
-detective.
-
-The EEPROM is a simple data storage. The printer might wants to:
-
-* read the toner model (to check compatibility)
-* store the number of printed pages and/or the number of printed dot
-* mark is as used by a particular printer to prevent second hand market
-* mark the date of the first and last usage to make it out of date.
-* store toner capacity of page and 'dot' (can be a cound down value).
-
-This is purely speculative at this stage.
-
-In the search for evidences, we can capture the USB packet sent by the
-computer to the printer. Thanks to tcpdump, this is very easy (see
-"Bonus 2: snif the USB packets").
-
-My particular printer uses 
-[Printer Job Language: PJL](https://en.wikipedia.org/wiki/Printer_Job_Language).
-Here is a data transfered over USB when I print a page:
-
-	%-12345X@PJL
-	@PJL SET TIMESTAMP=2015/09/14 21:15:14
-	@PJL SET FILENAME=test - Notepad
-	@PJL SET COMPRESS=JBIG
-	@PJL SET USERNAME=IEUser
-	@PJL SET COVER=OFF
-	@PJL SET HOLD=OFF
-	@PJL SET PAGESTATUS=START
-	@PJL SET COPIES=1
-	@PJL SET MEDIASOURCE=TRAY1
-	@PJL SET MEDIATYPE=PLAINRECYCLE
-	@PJL SET PAPER=LETTER
-	@PJL SET PAPERWIDTH=5100
-	@PJL SET PAPERLENGTH=6600
-	@PJL SET RESOLUTION=600
-	@PJL SET IMAGELEN=691
-	[... image data ... ]
-	@PJL SET DOTCOUNT=10745
-	@PJL SET PAGESTATUS=END
-	@PJL EOJ
-	%-12345X
-
-The important piece of information are:
-
-* the DOTCOUNT value
-* the TIMESTAMP value
-
-One note about dates: To implement a simple 'out of date' mechanism,
-year/mount/day is enough. But if the toner needs to warm-up or cool
-down hours/minutes/seconds might also required. 2016 converted to
-hexadecimal is 7E0. Be aware of Unix epoch format. It is well suited
-for this need. Here is an example of a date in hexadecimal values:
-
-	$ date --date='@1456056478'
-	Sun Feb 21 13:07:58 CET 2016
-	$ echo "obase=16; 1456056478" | bc
-	56C9A89E
-
-32 bits is enough to live until 2038, which certainly exceeded the expected
-life of such product.
-
-To recap, we can expect the following informations in the EEPROM
-memory:
-
-* a standard header to verify if the EEPROM is correctly workding
-* a part number for model compatibility
-* a status/error value (to signal when the toner has caused a problem)
-* a 'dot' count number (and/or the number of printed pages)
-* a maximum 'dot' capacity (and/or the maximum number of pages to print)
-* a last used date field (and/or a first used data field)
-
-Unfortunatly, I was not able to figure out the memory layout but I
-wish you better luck! 
-
 Step 6: try some changes
 ========================
 
@@ -308,20 +242,21 @@ page. This might give you clues about the memory layout.
 
 The process is like this:
 
-* read the EEPROM content
-* make some changes base on an hypothesis
-* write the content into the EEPROM
+* read the EEPROM content,
+* make some changes base on a hypothesis,
+* write the content into the EEPROM,
 * try to print a page and restart if this does not work.
 
 In order to speed up the process and not have to remove/reapply the chip to the toner 
 cartridge every time, I directly connected my Arduino to the chip on the toner while resetting it.
 
-![Picture: Working setup](images/final_setup.jpg)
+![Picture: Direct connect to the toner cartridge](images/final_setup.jpg)
 
 
-After experimenting a bit I decided to only include the  first 8 (0x00 - 0x07) bytes from the original chip dump.
+After experimenting a bit I decided to only include the  first 7 (0x00 - 0x06) bytes from the original chip dump.
 The rest of the first half of the chip contents are set to 0x00! The second half is not used.
-It turned out to work: my printer restarts and the tonner level indicator is at 100%
+
+It turned out to work: my printer restarts and the tonner level indicator is at 100%.
 
 Here is are the contents of the header arry used to reset the chip:
 
