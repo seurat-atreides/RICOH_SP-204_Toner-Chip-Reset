@@ -91,13 +91,13 @@ memory.
 # Step 3: Set up your Arduino
 =============================
 
-Thi is the breadboard setup I used:
+This is the breadboard setup I used:
 
 ![Picture: Breadboard layout](images/TonerChipResetBB.png)
 
-here is the corresponding schematic:
+Here is the corresponding schematic:
 
-![Picture: Breadboard schematic](images/TonerChipResetSchem.pdf) 
+![Schematic: Breadboard circuit](images/TonerChipResetSchem.png) 
 
 Depending on the Arduino you might have, the I2C pins are:
 
