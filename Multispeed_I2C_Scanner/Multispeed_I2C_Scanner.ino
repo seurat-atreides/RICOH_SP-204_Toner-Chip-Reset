@@ -1,7 +1,8 @@
 //
 //    FILE: MultiSpeed_I2C_Scanner.ino
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.1.7
+// CONTRIB: Ernesto Lorenz
+// VERSION: 0.1.8
 // PURPOSE: I2C scanner at different speeds
 //    DATE: 2013-11-05
 //     URL: http://forum.arduino.cc/index.php?topic=197360
