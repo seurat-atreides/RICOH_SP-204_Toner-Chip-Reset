@@ -36,14 +36,13 @@ printer will be able to initialize the chip and set the toner level to full.
 
 
 
-# Step 1: The problem
+# The problem
 
-Your computer talks to your printer via a USB link (or maybe through
-wifi). The printer itself communicate with the toner chip via an I2C
-bus.
+My computer talks to the SP-204 printer via an Ethernet link.
+The printer communicates with the toner chip via the I2C bus.
 
 	+------------+           +-----------+            +-------------+
-	|    Host    |    USB    |           |    I2C     |    toner    |
+	|    Host    |    ETH    |           |    I2C     |    toner    |
 	|  computer  | <-------> |  Printer  | <--------> |    chip     |
 	|            |           |           |            |             |
 	+------------+           +-----------+            +-------------+
@@ -58,15 +57,15 @@ chip like this:
 	+-----------+          +-----------+
 
 
-The I2C bus is very common on embedded systems. For example:
-smartphones use it to connect the touchscreen or the motion sensor
-to the main processor chip. There is plenty of documentation, I 
-recommend this one:
-[this one from saleae](http://support.saleae.com/hc/en-us/articles/200730905-Learn-I2C-Inter-Integrated-Circuit).
+The I2C bus is very common on embedded systems.
+For example: smartphones use it to connect the touchscreen or the motion sensors
+to the main processor chip. There is plenty of documentation available on the Internet.
+I recommend this one:
+[Learn I2C / from Saleae](https://support.saleae.com/hc/en-us/articles/115005987106-Learn-I2C-Inter-Integrated-Circuit).
 
-The full specification is avavailable at: http://www.i2c-bus.org/
+The full specification is avavailable at: [http://www.i2c-bus.org](http://www.i2c-bus.org)
 
-# Step 2: The toner chip module
+# The toner chip module
 
 To do this it is necessary to know what I2C EEPROM is used in the circuit.
 Try to gather as much information as you can:
@@ -96,8 +95,7 @@ __Here is the toner chip schematic:__
 The rest of this tutorial will deal with the process of reading and writing this EEPROM
 memory chip.
 
-# Step 3: Set up your Arduino
-=============================
+# Setting up your Arduino
 
 __This is the breadboard setup I used:__
 
@@ -107,8 +105,7 @@ __Here is the corresponding schematic:__
 ![Schematic: Breadboard circuit](images/TonerChipResetSchem.png)
 
 
-Step 3: Determine the I2C clock freq. and devices address
-=========================================================
+# Determining the I2C clock freq. and device address
 
 To communicate on an I2C bus, we need to know the correct clock speed and the
 EEPROM device address.
@@ -133,8 +130,7 @@ As can be seen on the front side of the chip module the hardwired levels are:
 The deice address is therefore: `1 0 1 0 0 1 1 (0x53)`.
 
 
-Regarding the Arduino sketches:
-===============================
+# Regarding the Arduino sketches
 
 I have modified both Arduino sketches published by Ludovic for usage of the extEEPROM library!
 I have added a menu to the Toner_chip_reset.ino so you can decide if you first want to
@@ -187,24 +183,23 @@ should not exceed 400 KHz!
 Therefore, I have used 400 KHz as the clock frequency for I2C bus access.
 
 
-Step 4: Reading the EEPROM contents
-===================================
+# Reading the EEPROM contents
 
 Since we know how to communicate with the chip, let's read the content
-of the memory. For 24xxx EEPROM, the [datasheet for FM24C02B](datasheet/FM24C02B-04B-08B-16B.pdf) explains how to complete a read operation:
+of the memory.
 
-	master send start condition
-	master send eeprom address + read bit
-	master send data address
-	master send start condition
-	master send eeprom address + read bit
-	device respond with data
-	master send stop condition
+The datasheet for the [BR24Lxxx-W](datasheet/BR24Lxxx-W-EEPROM.pdf) EEPROM explains how to perform a read operation:
 
-	STOP condition mandatory between writes.
-	Write cycle: 5 ms.
+- master send start condition
+- master send eeprom address + read bit
+- master send data address
+- master send start condition
+- master send eeprom address + read bit
+- device respond with data
+- master send stop condition
 
-
+   A STOP condition is mandatory between writes!
+   Write cycle: 5 ms.
 
 The contents of the original toner chip after my printer started to complain 
 about low toner level was:
@@ -236,8 +231,7 @@ Here we can see:
 This does not make much sense. The next step is to figure out what
 those values are for.
 
-Step 5: Try some variations
-===========================
+# Trying some variations of the EEPROM contents
 
 If you are lucky enough that your toner chip is still working (printing), 
 you can dump the content of the EEPROM before and after printing a
@@ -284,14 +278,12 @@ Here is are the contents of the header arry used to reset the chip:
 	unsigned int dump_bin_len = 256;
 
 
-Step 6: Share your findings
-===========================
+# Share your findings!
 
 If you decide to perform something similar on other toner chip model
 please share your findings with the community!
 
-Links
-=====
+# Links
 
 *The source of inspiration:*
 
@@ -328,8 +320,7 @@ Links
 - [http://support.saleae.com/hc/en-us/articles/200730905-Learn-I2C-Inter-Integrated-Circuit](http://support.saleae.com/hc/en-us/articles/200730905-Learn-I2C-Inter-Integrated-Circuit)
 
 
-Todo
-====
+# Todo
 
 - [x] Read internal EEPROM
 - [x] Draw the cricuit
@@ -343,4 +334,3 @@ Todo
 - [ ] Document the project
 - [ ] Learn about README.md format (image insertion & style)
 
-<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
