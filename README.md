@@ -64,7 +64,7 @@ recommend this one:
 
 The full specification is avavailable at: http://www.i2c-bus.org/
 
-# Step 2: The chip circuit
+# Step 2: The toner chip module
 
 To do this it is necessary to know what I2C EEPROM is used in the circuit.
 Try to gather as much information as you can:
@@ -81,23 +81,28 @@ This has been confirmed by the following blogs discussing other RICOH printer mo
 Looking at the chip with a magnifying glass and slanted lighting I could read
 a partialy erased designation text "L02W". This chip turns out to be a 
 BR24L02W EEPROM, the equivalent of the 24C02 EEPROM.
- 
+
 ![Picture: Toner Chip front](images/toner_chip_front_tagged.jpg)
+
 ![Picture: Toner Chip rear ](images/toner_chip_back_tagged.jpg)
 
-The rest of this tutorial is about how to read and write this EEPROM
-memory.
+__Here is the toner chip schematic:__
+
+![Schematic: Toner chip](images/TonerChipModuleSchem.png)
+
+
+The rest of this tutorial will deal with the process of reading and writing this EEPROM
+memory chip.
 
 # Step 3: Set up your Arduino
 =============================
 
-This is the breadboard setup I used:
+__This is the breadboard setup I used:__
 
 ![Picture: Breadboard layout](images/TonerChipResetBB.png)
+__Here is the corresponding schematic:__
 
-Here is the corresponding schematic:
-
-![Schematic: Breadboard circuit](images/TonerChipResetSchem.png) 
+![Schematic: Breadboard circuit](images/TonerChipResetSchem.png)
 
 
 Step 3: Determine the I2C clock freq. and devices address
@@ -114,15 +119,16 @@ indicates a max. clock freq. of 400KHz for Vcc > 2.5Vdc.
 
 The datasheet indicates how to calculate the address according to the logic level
 present on pins: A0, A1 & A2. In binary, the address is computed like this:
-__1 0 1 0 A2 A1 A0__
+`1 0 1 0 A2 A1 A0`
 
 As can be seen on the front side of the chip module the hardwired levels are:
 
+```
 	A0 = 1
 	A1 = 1
 	A2 = 0
-
-The deice address is teherfore: __1 0 1 0 0 1 1 (0x53)__.
+```
+The deice address is therefore: `1 0 1 0 0 1 1 (0x53)`.
 
 
 Regarding the Arduino sketches:
@@ -200,7 +206,7 @@ of the memory. For 24xxx EEPROM, the [datasheet for FM24C02B](datasheet/FM24C02B
 
 The contents of the original toner chip after my printer started to complain 
 about low toner level was:
-
+```
     000: 21 00 01 03 03 01 01 00  00 00 34 30 37 32 35 35  |!.........407255|
     010: 13 04 4d 43 10 00 01 02  00 00 00 00 20 14 07 31  |..MC........ ..1|
     020: 54 37 37 33 4d 38 30 31  31 32 30 20 1e 30 00 00  |T773M801120 .0..|
@@ -217,7 +223,7 @@ about low toner level was:
     0d0: ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
     0e0: ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
     0f0: ff ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
-
+```
 Here we can see:
 
 * there seems to be a header (0x0 to 0x0f),
@@ -332,7 +338,7 @@ Todo
 - [x] Verify the write function
 - [x] Experiment with reset patterns
 - [x] Test with the printer
-- [ ] Document the findings
+- [ ] Document the project
 - [ ] Learn about README.md format (image insertion & style)
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
