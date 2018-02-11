@@ -1,6 +1,6 @@
 # Acknowledgement
 
-I'd like to thank Ludivic Guegan (lugu), from whom I forked the base for this work, 
+I'd like to thank Ludovic Guegan (lugu), from whom I forked the base for this work, 
 for inspiring me to do experiment with my printers (RICOH Aficio SP-204) toner chip 
 model and be able to reset it effectively. It has been a great learning experience 
 on how the I2C protocol works and how to manipulate I2C EEPROMS.
