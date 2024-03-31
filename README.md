@@ -293,7 +293,6 @@ please share your findings with the community!
 
 - [http://www.hobbytronics.co.uk/arduino-external-eeprom](http://www.hobbytronics.co.uk/arduino-external-eeprom)
 - [http://www.hobbytronics.co.uk/eeprom-page-write](http://www.hobbytronics.co.uk/eeprom-page-write)
-- [http://lusorobotica.com/index.php/topic,461.msg2738.html](http://lusorobotica.com/index.php/topic,461.msg2738.html)
 
 *Arduino related:*
 
