@@ -1,9 +1,9 @@
 /*
     FILE: Toner_Chip_Reset.ino
   AUTHOR: Ernesto Lorenz
- VERSION: 0.1
+ VERSION: 0.1.1
  PURPOSE: Reset chip for the Ricoh Aficio SP-204 toner cartridge
-    DATE: 10.02.2018
+    DATE: 31.03.2024
   GITHUB: 
 
  Released to the public domain
@@ -52,22 +52,6 @@ void dump(void) {
    }  
 }
 
-// initialize serial connection and wait for user input.
-// initialize i2c bus after user input.
-void initialize(void) {
-
-  Serial.begin(57600);
-  Serial.println("Let's get started");
-  
-  byte i2cStat = toner_chip.begin(toner_chip.twiClock800kHz);
-  
-  if ( i2cStat != 0 ) {
-    Serial.println("I2C bus init error");
-  } else {
-  Serial.println("I2C bus initalized");
-  }
-}
-
 void reset(void) {
   toner_chip.write(0x0, chip_reset, chip_dump_len); //buffered write to the chip
   Serial.println();
@@ -97,7 +81,7 @@ void displayHelp()
 }
 
 void setup(void) {
-  Serial.begin(57600);
+  Serial.begin(115200);
   Serial.println("Initializing I2C bus");
   byte i2cStat = toner_chip.begin(toner_chip.twiClock800kHz);
   if ( i2cStat != 0 ) {
