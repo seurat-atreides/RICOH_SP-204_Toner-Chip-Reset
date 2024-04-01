@@ -113,7 +113,7 @@ EEPROM device address.
 If you know the EEPROM model from the circuit analysis, you can
 read the datasheet and find the clock rate and address like this:
 
-For example the [datasheet for the BR24L02-W](datasheet/BR24Lxxx-W-EEPROM.pdf)
+For example the [datasheet for the BR24L02-W](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/325/BR24Lzzz-W_Series.pdf)
 indicates a max. clock freq. of 400KHz for Vcc > 2.5Vdc.
 
 The datasheet indicates how to calculate the address according to the logic level
@@ -188,7 +188,7 @@ Therefore, I have used 400 KHz as the clock frequency for I2C bus access.
 Since we know how to communicate with the chip, let's read the content
 of the memory.
 
-The datasheet for the [BR24Lxxx-W](datasheet/BR24Lxxx-W-EEPROM.pdf) EEPROM explains how to perform a read operation:
+The datasheet for the [BR24Lxx-W](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/325/BR24Lzzz-W_Series.pdf) EEPROM explains how to perform a read operation:
 
 - master send start condition
 - master send eeprom address + read bit
@@ -289,9 +289,6 @@ please share your findings with the community!
 
 - [https://github.com/lugu/toner_chip_reset](https://github.com/lugu/toner_chip_reset)
 
-*Blogs:*
-
-- [http://www.hobbytronics.co.uk/arduino-external-eeprom](http://www.hobbytronics.co.uk/arduino-external-eeprom)
 
 *Arduino related:*
 
@@ -308,14 +305,13 @@ please share your findings with the community!
 
 *RICOH:*
 
-- [https://www.techdata.com/business/Ricoh/files/july2014/CurrentMSRP.pdf](https://www.techdata.com/business/Ricoh/files/july2014/CurrentMSRP.pdf)
-- [http://support.ricoh.com/bb_v1oi/pub_e/oi/0001044/0001044844/VM1018655/M1018655.pdf](http://support.ricoh.com/bb_v1oi/pub_e/oi/0001044/0001044844/VM1018655/M1018655.pdf
+- [SP 204 Operating Instructions / User Guide](http://support.ricoh.com/bb_v1oi/pub_e/oi/0001047/0001047863/VM1438632/M1438632.pdf
 )
 
 *Logical Analyser & I2C:*
 
-- [http://support.saleae.com/hc/en-us/articles/202740085-Using-Protocol-Analyzers](http://support.saleae.com/hc/en-us/articles/202740085-Using-Protocol-Analyzers)
-- [http://support.saleae.com/hc/en-us/articles/200730905-Learn-I2C-Inter-Integrated-Circuit](http://support.saleae.com/hc/en-us/articles/200730905-Learn-I2C-Inter-Integrated-Circuit)
+- [Using Protocol Analyzers](https://support.saleae.com/user-guide/using-logic/using-protocol-analyzers)
+- [Learn I2C - Inter-Integrated Circuit](https://support.saleae.com/tutorials/learning-portal/learning-resources/learn-i2c)
 
 
 # Todo
@@ -329,6 +325,6 @@ please share your findings with the community!
 - [x] Verify the write function
 - [x] Experiment with reset patterns
 - [x] Test with the printer
-- [ ] Document the project
-- [ ] Learn about README.md format (image insertion & style)
+- [x] Document the project
+- [x] Learn about README.md format (image insertion & style)
 
