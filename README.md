@@ -113,7 +113,7 @@ EEPROM device address.
 If you know the EEPROM model from the circuit analysis, you can
 read the datasheet and find the clock rate and address like this:
 
-For example the [datasheet for the BR24L02-W](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/325/BR24Lzzz-W_Series.pdf)
+For example the [datasheet for the BR24Lxx-W](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/325/BR24Lzzz-W_Series.pdf)
 indicates a max. clock freq. of 400KHz for Vcc > 2.5Vdc.
 
 The datasheet indicates how to calculate the address according to the logic level
