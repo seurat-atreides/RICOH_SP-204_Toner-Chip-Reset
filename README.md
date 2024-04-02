@@ -19,7 +19,7 @@ In order to reuse this kind of toner, there are two things you need to do:
 1. refill the toner with ink (if needed)
 2. reset the toner chip (or replace it)
 
-There is [plenty of information](www.uni-kit.com/pdf/tonerrefillinstructions.pdf) explaining how to refill the
+There is [plenty of information](http://www.uni-kit.com/pdf/tonerrefillinstructions.pdf) explaining how to refill the
 toner but little information on how to erase the toner chip.
 
 This document deals with the second point: how to dump the chip and
