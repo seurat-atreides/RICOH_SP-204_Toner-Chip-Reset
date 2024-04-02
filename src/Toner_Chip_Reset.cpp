@@ -53,7 +53,7 @@ void dump(void) {
 }
 
 void reset(void) {
-  toner_chip.write(0x0, chip_reset, chip_dump_len); //buffered write to the chip
+  toner_chip.write(0x0, chip_dump2, chip_dump_len); //buffered write to the chip
   Serial.println();
   dump();
 }
@@ -68,8 +68,7 @@ char getCommand()
   return c;
 }
 
-void displayHelp()
-{
+void displayHelp() {
   Serial.print(F("\nRICOH toner chip reset - "));
   Serial.println(version);
   Serial.println();
@@ -83,7 +82,7 @@ void displayHelp()
 void setup(void) {
   Serial.begin(115200);
   Serial.println("Initializing I2C bus");
-  byte i2cStat = toner_chip.begin(toner_chip.twiClock800kHz);
+  byte i2cStat = toner_chip.begin(toner_chip.twiClock400kHz);
   if ( i2cStat != 0 ) {
     Serial.println("I2C bus init error");
   }
@@ -107,7 +106,7 @@ void loop() {
       reset();
 
     case '?':
-      displayHelp;
+      displayHelp();
       break;
       
     default:
